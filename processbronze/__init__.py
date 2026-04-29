@@ -16,7 +16,7 @@ def upload_to_adls(df: pd.DataFrame):
     service_client = DataLakeServiceClient(account_url=account_url, credential=credential)
     file_system_client = service_client.get_file_system_client(file_system=file_system)
 
-    for (ticker, year, month), group in df.groupby(['Ticker', 'Year', 'Month']):
+    for (ticker, year, month), group in df.groupby(['ticker', 'year', 'month']):
         buffer = StringIO()
         group.to_csv(buffer, index=False)
         buffer.seek(0)
@@ -50,10 +50,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 if isinstance(df.columns, pd.MultiIndex):
                     df.columns = df.columns.get_level_values(0)
                 df.reset_index(inplace=True)
-                df["Date"] = pd.to_datetime(df['Date'])
-                df['Year'] = df['Date'].dt.year
-                df['Month'] = df['Date'].dt.month
-                df["Ticker"] = symbol
+                df.columns = df.columns.str.lower()
+                df["date"] = pd.to_datetime(df['date'])
+                df["year"] = df["date"].dt.year
+                df["month"] = df["date"].dt.month
+                df["ticker"] = symbol
+                df["ingest_date"] = datetime.now().date().strftime("%Y-%m-%d")
 
         else:
             if not symbol:
