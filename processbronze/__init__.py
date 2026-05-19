@@ -7,16 +7,17 @@ import pyarrow as pa
 import pyarrow.dataset as ds
 from datetime import datetime, timedelta
 import fsspec
+import uuid
 
 # =========================
 # CONFIG
 # =========================
 
-FILE_SYSTEM = "stocks"
-BRONZE_PATH = f"{FILE_SYSTEM}/bronze"
-METADATA_PATH = f"{FILE_SYSTEM}/metadata"
-ACCOUNT_URL = "https://finstocksdata.dfs.core.windows.net/"
-DEFAULT_START_DATE = "2023-01-01"
+# FILE_SYSTEM = "stocks"
+# BRONZE_PATH = f"{FILE_SYSTEM}/bronze"
+# METADATA_PATH = f"{FILE_SYSTEM}/metadata"
+# ACCOUNT_URL = "https://finstocksdata.dfs.core.windows.net/"
+# DEFAULT_START_DATE = "2023-01-01"
 
 # =========================
 # EXTRACT
@@ -147,6 +148,8 @@ def load_bronze_layer(fs, df: pd.DataFrame) -> str:
 
     table = table.append_column("month",pa.array(df["date"].dt.month))
 
+    file_id = uuid.uuid4().hex
+
     ds.write_dataset(
         table,
         base_dir=BRONZE_PATH,
@@ -154,7 +157,7 @@ def load_bronze_layer(fs, df: pd.DataFrame) -> str:
         format="parquet",
         partitioning=["ticker", "year", "month"],
         existing_data_behavior="overwrite_or_ignore",
-        basename_template="part_{i}.parquet",
+        basename_template=f"part_{file_id}_{{i}}.parquet",
         max_rows_per_file=100_000,
         max_rows_per_group=100_000,
         use_threads=True
@@ -288,56 +291,56 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
         # for symbol in symbols:
 
-        #     try:
+        try:
 
-        #         rows = process_bronze_layer(
-        #             fs=fs,
-        #             symbol=symbol,
-        #             mode=mode,
-        #             start_date=start_date
-        #         )
+            rows = process_bronze_layer(
+                fs=fs,
+                symbol=symbol,
+                mode=mode,
+                start_date=start_date
+            )
 
-        #         total_rows += rows
+            total_rows += rows
 
-        #     except Exception as symbol_error:
+        except Exception as symbol_error:
 
-        #         logging.error(
-        #             f"{symbol} failed: "
-        #             f"{str(symbol_error)}"
-        #         )
+            logging.error(
+                f"{symbol} failed: "
+                f"{str(symbol_error)}"
+            )
 
-        # # ---------------------
-        # # RESPONSE
-        # # ---------------------
-
-        # return func.HttpResponse(
-        #     json.dumps({
-        #         "status": "success",
-        #         "mode": mode,
-        #         "rows_processed": total_rows,
-        #         "symbols": symbols
-        #     }),
-        #     mimetype="application/json",
-        #     status_code=200
-        # )
-
-        file_path = (
-            "stocks/bronze/"
-            "MSFT/2026/5/"
-            "part_0.parquet"
-        )
-
-        with fs.open(file_path, "rb") as f:
-
-            df = pd.read_parquet(f)
+    # ---------------------
+    # RESPONSE
+    # ---------------------
 
         return func.HttpResponse(
-            df.to_json(
-                orient="records",
-                date_format="iso"),
+            json.dumps({
+                "status": "success",
+                "mode": mode,
+                "rows_processed": total_rows,
+                "symbols": symbols
+            }),
             mimetype="application/json",
             status_code=200
         )
+
+        # file_path = (
+        #     "stocks/bronze/"
+        #     "NVDA/2026/5/"
+        #     "part_f8b8a69d7f9a4e1c843a666c553808c3_0.parquet"
+        # )
+
+        # with fs.open(file_path, "rb") as f:
+
+        #     df = pd.read_parquet(f)
+
+        # return func.HttpResponse(
+        #     df.to_json(
+        #         orient="records",
+        #         date_format="iso"),
+        #     mimetype="application/json",
+        #     status_code=200
+        # )
 
     except Exception as e:
 
