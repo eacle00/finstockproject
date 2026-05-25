@@ -36,7 +36,11 @@ def extract_bronze_layer(symbol: str, start_date: str) -> pd.DataFrame:
     )
 
     if df.empty:
-        return pd.DataFrame()
+        logging.warning(f"No data returned for {symbol}")
+        return func.HttpResponse(
+            f"No data for {symbol}",
+            status_code=404
+        )
 
     # flatten multi-index columns
     if isinstance(df.columns, pd.MultiIndex):
@@ -180,7 +184,7 @@ def load_bronze_layer(fs, df: pd.DataFrame) -> str:
 # =========================
 # PROCESS BRONZE LAYER
 # =========================
-def process_bronze_layer(fs, symbol: str, mode: str, start_date: str = None) -> int:
+def process_bronze_layer(fs, symbol: str, mode: str, start_date: str) -> int:
 
     logging.info(
         f"Processing {symbol} "
