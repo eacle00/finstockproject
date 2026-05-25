@@ -13,11 +13,11 @@ import uuid
 # CONFIG
 # =========================
 
-# FILE_SYSTEM = "stocks"
-# BRONZE_PATH = f"{FILE_SYSTEM}/bronze"
-# METADATA_PATH = f"{FILE_SYSTEM}/metadata"
-# ACCOUNT_URL = "https://finstocksdata.dfs.core.windows.net/"
-# DEFAULT_START_DATE = "2023-01-01"
+FILE_SYSTEM = "stocks"
+BRONZE_PATH = f"{FILE_SYSTEM}/bronze"
+METADATA_PATH = f"{FILE_SYSTEM}/metadata"
+ACCOUNT_URL = "https://finstocksdata.dfs.core.windows.net/"
+DEFAULT_START_DATE = "2023-01-01"
 
 # =========================
 # EXTRACT
@@ -115,7 +115,7 @@ def write_metadata(fs, symbol: str, last_processed_date: str):
     metadata_path = get_metadata_path(symbol)
 
     metadata = {
-        "ticker": symbol,
+        "symbol": symbol,
         "last_processed_date": last_processed_date,
         "updated_at": datetime.utcnow().isoformat()
     }
@@ -263,11 +263,11 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
         mode = body.get("mode", "incremental")
 
-        symbols = body.get("symbol", [])
+        symbol = body.get("symbol")
 
-        start_date = body.get("start_date")
+        start_date = body.get("start_date", DEFAULT_START_DATE)
 
-        if not symbols:
+        if not symbol:
             return func.HttpResponse(
                 "Missing required parameter: symbol",
                 status_code=400
@@ -309,16 +309,16 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 f"{str(symbol_error)}"
             )
 
-    # ---------------------
-    # RESPONSE
-    # ---------------------
+        # ---------------------
+        # RESPONSE
+        # ---------------------
 
         return func.HttpResponse(
             json.dumps({
                 "status": "success",
                 "mode": mode,
                 "rows_processed": total_rows,
-                "symbols": symbols
+                "symbol": symbol
             }),
             mimetype="application/json",
             status_code=200
