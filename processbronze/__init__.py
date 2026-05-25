@@ -283,7 +283,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             anon=False
         )
 
-        total_rows = 0
+        # total_rows = 0
 
         # ---------------------
         # PROCESS SYMBOLS
@@ -300,7 +300,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 start_date=start_date
             )
 
-            total_rows += rows
+            total_rows = rows
 
         except Exception as symbol_error:
 
