@@ -50,6 +50,10 @@ def extract_bronze_layer(symbol: str, start_date: str) -> pd.DataFrame:
 
     df.columns = df.columns.str.lower()
 
+    logging.info(
+        f"Done extracting data for {symbol}"
+    )
+    
     return df
 
 # =========================
@@ -66,6 +70,10 @@ def transform_bronze_layer(df: pd.DataFrame, symbol: str) -> pd.DataFrame:
     df["ticker"] = symbol
 
     df["ingest_date"] = datetime.utcnow().strftime("%Y-%m-%d")
+
+    logging.info(
+        f"Done transforming data for {symbol}"
+    )
 
     return df
 
@@ -177,7 +185,7 @@ def load_bronze_layer(fs, df: pd.DataFrame) -> str:
         f"Upload successful until "
         f"{latest_processed_date}"
     )
-
+    
     return latest_processed_date
 
 
@@ -287,7 +295,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             anon=False
         )
 
-        # total_rows = 0
+        total_rows = 0
 
         # ---------------------
         # PROCESS SYMBOLS
@@ -304,7 +312,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 start_date=start_date
             )
 
-            total_rows = rows
+            total_rows += rows
 
         except Exception as symbol_error:
 
