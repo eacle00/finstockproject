@@ -15,7 +15,7 @@ import uuid
 
 FILE_SYSTEM = "stocks"
 BRONZE_PATH = f"{FILE_SYSTEM}/bronze"
-METADATA_PATH = f"{FILE_SYSTEM}/metadata"
+METADATA_PATH = f"{FILE_SYSTEM}/bronze/metadata"
 ACCOUNT_URL = "https://finstocksdata.dfs.core.windows.net/"
 DEFAULT_START_DATE = "2023-01-01"
 
