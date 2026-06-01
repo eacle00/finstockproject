@@ -2,11 +2,6 @@
   "IsEncrypted": false,
   "Values": {
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
-    "FUNCTIONS_WORKER_RUNTIME": "python",
-    "FILE_SYSTEM": "stocks",
-    "ACCOUNT_URL": "https://finstocksdata.dfs.core.windows.net/",
-    "DEFAULT_START_DATE": "2023-01-01",
-    "BRONZE_PATH": "stocks/bronze",
-    "METADATA_PATH": "stocks/metadata"
+    "FUNCTIONS_WORKER_RUNTIME": "python"
   }
 }

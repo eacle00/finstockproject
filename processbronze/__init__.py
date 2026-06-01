@@ -14,7 +14,7 @@ import uuid
 # =========================
 
 FILE_SYSTEM = "stocks"
-BRONZE_PATH = f"{FILE_SYSTEM}/bronze"
+BRONZE_PATH = f"{FILE_SYSTEM}/bronze/data"
 METADATA_PATH = f"{FILE_SYSTEM}/bronze/metadata"
 ACCOUNT_URL = "https://finstocksdata.dfs.core.windows.net/"
 DEFAULT_START_DATE = "2023-01-01"
@@ -195,7 +195,7 @@ def load_bronze_layer(fs, df: pd.DataFrame) -> str:
 def process_bronze_layer(fs, symbol: str, mode: str, start_date: str) -> int:
 
     logging.info(
-        f"Processing {symbol} "
+        f"Bronze: Processing {symbol} "
         f"in {mode} mode"
     )
 
