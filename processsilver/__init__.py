@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 # CONFIG
 # =========================
 FILE_SYSTEM = "stocks"
-BRONZE_PATH = f"{FILE_SYSTEM}/bronze"
+BRONZE_DATA_PATH = f"{FILE_SYSTEM}/bronze/data"
 SILVER_PATH = f"{FILE_SYSTEM}/silver"
 METADATA_PATH = f"{FILE_SYSTEM}/silver/metadata"
 ACCOUNT_URL = "https://finstocksdata.dfs.core.windows.net/"
@@ -19,19 +19,58 @@ ACCOUNT_URL = "https://finstocksdata.dfs.core.windows.net/"
 
 def get_metadata_path(symbol: str) -> str:
     return f"{METADATA_PATH}/{symbol}.json"
-
 # =========================
 # EXTRACT
 # =========================
-def extract_silver_layer():
+def extract_silver_layer(fs, symbol: str, mode: str):
     logging.info(f"Extracting data from the bronze layer")
 
+    dataset = ds.dataset(
+        f"{BRONZE_DATA_PATH}/{symbol}",
+        filesystem=fs,
+        format="parquet"
+    )
+    df = dataset.to_table().to_pandas()
+    df['ticker'] = symbol
+
+    return df
 # =========================
 # TRANSFORM
 # =========================
-def transform_silver_layer():
+def transform_silver_layer(df: pd.DataFrame) -> pd.DataFrame:
     logging.info(f"Transforming data for the silver layer")
+    # ========================
+    # CLEANING & VALIDATION
+    # ========================
+    df = df.rename(columns={"date": "trade_date"})
+    df["ingest_date"] = pd.to_datetime(df["ingest_date"])
+    df = df.sort_values("trade_date")
+    df = df.drop_duplicates(subset=["ticker", "trade_date"])
 
+    df = df[
+        (df["high"] >= df["low"]) &
+        (df["high"] >= df["open"]) &
+        (df["high"] >= df["close"]) &
+        (df["low"] <= df["open"]) &
+        (df["low"] <= df["close"])
+    ]
+
+    df = df[df["volume"] >= 0]
+
+    # =======================
+    # ADDING NEW FEATURES 
+    # =======================
+    df["daily_return"] = (df.groupby("ticker")["close"].pct_change())
+    df["sma_5"] = (df.groupby("ticker")["close"].transform(lambda x: x.rolling(5).mean()))
+    df["sma_20"] = (df.groupby("ticker")["close"].transform(lambda x: x.rolling(20).mean()))
+    df["volatility_20"] = (df.groupby("ticker")["daily_return"].transform(lambda x: x.rolling(20).std()))
+    df["volume_change"] = (df.groupby("ticker")["volume"].pct_change())
+    df["target_direction"] = ((df.groupby("ticker")["close"].shift(-1) > df["close"]).astype(int))
+
+    logging.info(df.dtypes)
+    logging.info(df.head(1))
+    df.to_csv('C:/Users/AL/Desktop/Resume/test.csv', index=False)
+    return df
 # =========================
 # LOAD
 # =========================
@@ -43,12 +82,12 @@ def load_silver_layer():
 # =========================
 def process_silver_layer(fs, symbol: str, mode: str):
     logging.info(f"Processing {symbol} in {mode}")
-
-    parquet_files = fs.glob(f"{BRONZE_PATH}/**/*.parquet")
     
-    print(f"Type: {type(parquet_files)}")
-    for file in parquet_files:
-        logging.info(file)
+    parquet_files = fs.glob(f"{BRONZE_DATA_PATH}/{symbol}/**/*.parquet")
+    
+    df = extract_silver_layer(fs, symbol=symbol, mode=mode)
+
+    df = transform_silver_layer(df=df)
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info(f"Processing the silver layer started")
