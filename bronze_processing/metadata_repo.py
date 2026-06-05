@@ -24,7 +24,7 @@ class MetadataRepository:
 
         return (datetime.strptime(last_date, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
     
-    def write(self,symbol: str,last_processed_date: str):
+    def write(self, symbol: str, last_processed_date: str):
 
         path = self.get_path(symbol)
 

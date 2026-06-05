@@ -4,7 +4,7 @@ import pyarrow as pa
 import pyarrow.dataset as ds
 import uuid
 
-class LoadBronze:
+class BronzeLoader:
     
     def __init__(self, fs, bronze_path):
         self.fs = fs
@@ -36,9 +36,6 @@ class LoadBronze:
 
         latest_processed_date = df["date"].max().strftime("%Y-%m-%d")
 
-        logging.info(
-            f"Upload successful until "
-            f"{latest_processed_date}"
-        )
+        logging.info(f"Upload successful until {latest_processed_date}")
 
         return latest_processed_date

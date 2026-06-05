@@ -2,7 +2,7 @@ import logging
 import pandas as pd
 import yfinance as yf
 
-class ExtractBronze:
+class BronzeExtractor:
     def extract(self, symbol: str, start_date: str) -> pd.DataFrame:
         logging.info(f"Extracting {symbol} starting from {start_date}")
 
