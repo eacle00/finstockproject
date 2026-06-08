@@ -1,0 +1,63 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  azureSubscription: 'Azure-Service-Connection'
+  functionAppName: 'ingest-finstocksdata'
+  pythonVersion: '3.13.3'
+
+stages:
+- stage: Build
+  jobs:
+  - job: BuildFunction
+    steps:
+
+    - checkout: self
+
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(pythonVersion)'
+
+    - script: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+      displayName: 'Install dependencies'
+
+    - task: ArchiveFiles@2
+      displayName: 'Create deployment package'
+      inputs:
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
+        includeRootFolder: false
+        archiveType: zip
+        archiveFile: '$(Build.ArtifactStagingDirectory)/functionapp.zip'
+        replaceExistingArchive: true
+
+    - publish: $(Build.ArtifactStagingDirectory)/functionapp.zip
+      artifact: drop
+
+- stage: Deploy
+  dependsOn: Build
+  jobs:
+  - deployment: DeployFunction
+    environment: production
+
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+
+          - download: current
+            artifact: drop
+
+          - task: AzureFunctionApp@2
+            displayName: 'Deploy Azure Function App'
+            inputs:
+              azureSubscription: '$(azureSubscription)'
+              appType: functionAppLinux
+              appName: '$(functionAppName)'
+              package: '$(Pipeline.Workspace)/drop/functionapp.zip'
