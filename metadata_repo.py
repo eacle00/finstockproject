@@ -1,23 +1,35 @@
 import json
+import fsspec
 from datetime import datetime, timedelta, UTC
 
 class MetadataRepository:
     
-    def __init__(self, fs, metadata_path, default_start_date):
-        self.fs = fs
+    def __init__(self, metadata_path, default_start_date, account_url):
         self.metadata_path = metadata_path
         self.default_start_date = default_start_date
+        self.account_url = account_url
+
+    def create_filesystem(self):
+
+        fs = fsspec.filesystem(
+            "abfs",
+            account_name=self.account_url.replace("https://", "").split(".")[0],
+            anon=False
+        )
+
+        return fs
 
     def get_path(self, symbol: str) -> str:
         return (f"{self.metadata_path}/{symbol}.json")
 
     def read(self, symbol: str) -> str:
         path = self.get_path(symbol)
+        fs = self.create_filesystem()
 
-        if not self.fs.exists(path):
+        if not fs.exists(path):
             return self.default_start_date
 
-        with self.fs.open(path, "r") as f:
+        with fs.open(path, "r") as f:
             metadata = json.load(f)
 
         last_date = metadata.get("last_processed_date", self.default_start_date)
@@ -27,8 +39,9 @@ class MetadataRepository:
     def write(self, symbol: str, last_processed_date: str):
 
         path = self.get_path(symbol)
+        fs = self.create_filesystem()
 
-        with self.fs.open(path, "w") as f:
+        with fs.open(path, "w") as f:
 
             json.dump(
                 {

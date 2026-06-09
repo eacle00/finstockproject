@@ -1,6 +1,5 @@
-import fsspec
 import logging
-from bronze_processing.metadata_repo import MetadataRepository
+from metadata_repo import MetadataRepository
 from bronze_processing.extract_bronze import BronzeExtractor
 from bronze_processing.transform_bronze import BronzeTransformer
 from bronze_processing.load_bronze import BronzeLoader
@@ -14,18 +13,8 @@ class BronzeProcessor:
         self.account_url = account_url
         self.bronze_data_path = bronze_data_path
         self.bronze_metadata_path = bronze_metadata_path
-
-    def create_filesystem(self):
-
-        fs = fsspec.filesystem(
-            "abfs",
-            account_name=self.account_url.replace("https://", "").split(".")[0],
-            anon=False
-        )
-        
-        return fs
     
-    def process(self, fs):
+    def process(self):
         
         logging.info(
             f"Bronze: Processing {self.symbol} "
@@ -33,12 +22,13 @@ class BronzeProcessor:
         )
 
         metadata = MetadataRepository(
-            fs,
             metadata_path=self.bronze_metadata_path,
-            default_start_date=self.start_date
+            default_start_date=self.start_date,
+            account_url=self.account_url
         )
 
-        
+        fs = metadata.create_filesystem()
+
         if self.mode == "initial":
 
             if not self.start_date:
@@ -87,12 +77,10 @@ class BronzeProcessor:
     
     def run(self):
 
-        fs = self.create_filesystem()
-
         total_rows = 0
 
         try:
-            rows = self.process(fs)
+            rows = self.process()
 
             total_rows += rows
         
