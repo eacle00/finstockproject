@@ -4,10 +4,11 @@ import pandas as pd
 from datetime import datetime, UTC
 from pandas.testing import assert_frame_equal
 
+
 def test_bronze_transform():
     symbol = 'AAPL'
     effective_start_date = '2026-06-05'
-    
+
     extractor = BronzeExtractor()
     transformer = BronzeTransformer()
 
@@ -23,6 +24,6 @@ def test_bronze_transform():
 
     target = transformer.transform(df=raw, symbol=symbol)
 
-    assert_frame_equal(source,target)
+    assert_frame_equal(source, target)
 
     assert source.equals(target)

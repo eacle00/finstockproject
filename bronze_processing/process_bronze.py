@@ -4,6 +4,7 @@ from bronze_processing.extract_bronze import BronzeExtractor
 from bronze_processing.transform_bronze import BronzeTransformer
 from bronze_processing.load_bronze import BronzeLoader
 
+
 class BronzeProcessor:
 
     def __init__(self,
@@ -13,14 +14,14 @@ class BronzeProcessor:
                  account_url,
                  bronze_data_path,
                  bronze_metadata_path):
-        
+
         self.symbol = symbol
         self.mode = mode
         self.start_date = start_date
         self.account_url = account_url
         self.bronze_data_path = bronze_data_path
         self.bronze_metadata_path = bronze_metadata_path
-    
+
     def process(self):
 
         logging.info(f"Bronze: Processing {self.symbol} in {self.mode} mode")
@@ -57,7 +58,8 @@ class BronzeProcessor:
 
         extractor = BronzeExtractor()
 
-        df = extractor.extract(symbol=self.symbol, start_date=effective_start_date)
+        df = extractor.extract(symbol=self.symbol,
+                               start_date=effective_start_date)
 
         if df.empty:
             logging.info(f"No new data for {self.symbol}")
@@ -78,7 +80,7 @@ class BronzeProcessor:
         )
 
         return len(df)
-    
+
     def run(self):
 
         total_rows = 0

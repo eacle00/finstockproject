@@ -3,8 +3,9 @@ import fsspec
 from datetime import datetime, timedelta, UTC
 import logging
 
+
 class MetadataRepository:
-    
+
     def __init__(self, metadata_path, default_start_date, account_url):
         self.metadata_path = metadata_path
         self.default_start_date = default_start_date
@@ -12,9 +13,10 @@ class MetadataRepository:
 
     def create_filesystem(self):
 
+        acct_name = self.account_url.replace("https://","").split(".")[0]
         fs = fsspec.filesystem(
             "abfs",
-            account_name=self.account_url.replace("https://", "").split(".")[0],
+            account_name=acct_name,
             anon=False
         )
 
@@ -33,10 +35,12 @@ class MetadataRepository:
         with fs.open(path, "r") as f:
             metadata = json.load(f)
 
-        last_date = metadata.get("last_processed_date", self.default_start_date)
+        last_date = metadata.get("last_processed_date",
+                                 self.default_start_date)
 
-        return (datetime.strptime(last_date, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
-    
+        return (datetime.strptime(last_date, "%Y-%m-%d") + 
+                timedelta(days=1)).strftime("%Y-%m-%d")
+
     def write(self, symbol: str, last_processed_date: str):
 
         path = self.get_path(symbol)
@@ -53,14 +57,12 @@ class MetadataRepository:
                 f,
                 indent=4
             )
-    
+
     def read_processed_files(self, silver_metapath: str) -> list:
         
         logging.info("Read processed files in progress")
 
     def get_processed_files(self, symbol: str, silver_metapath: str) -> list:
         fs = self.create_filesystem()
-
-        bronze_parquet_files = fs.glob(f"{self.metadata_path}/{symbol}/**/*.parquet")
-
-        
+        files = f"{self.metadata_path}/{symbol}/**/*.parquet"
+        bronze_parquet_files = fs.glob(files)
