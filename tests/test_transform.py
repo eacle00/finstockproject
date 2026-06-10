@@ -23,4 +23,6 @@ def test_bronze_transform():
 
     target = transformer.transform(df=raw, symbol=symbol)
 
-    assert assert_frame_equal(source,target)
+    assert_frame_equal(source,target)
+
+    assert source.equals(target)
