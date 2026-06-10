@@ -13,7 +13,7 @@ class MetadataRepository:
 
     def create_filesystem(self):
 
-        acct_name = self.account_url.replace("https://","").split(".")[0]
+        acct_name = self.account_url.replace("https://", "").split(".")[0]
         fs = fsspec.filesystem(
             "abfs",
             account_name=acct_name,
@@ -38,7 +38,7 @@ class MetadataRepository:
         last_date = metadata.get("last_processed_date",
                                  self.default_start_date)
 
-        return (datetime.strptime(last_date, "%Y-%m-%d") + 
+        return (datetime.strptime(last_date, "%Y-%m-%d") +
                 timedelta(days=1)).strftime("%Y-%m-%d")
 
     def write(self, symbol: str, last_processed_date: str):
@@ -59,7 +59,7 @@ class MetadataRepository:
             )
 
     def read_processed_files(self, silver_metapath: str) -> list:
-        
+
         logging.info("Read processed files in progress")
 
     def get_processed_files(self, symbol: str, silver_metapath: str) -> list:
