@@ -6,6 +6,8 @@ from bronze_processing.process_bronze import BronzeProcessor
 from silver_processing.process_silver import SilverProcessor
 
 app = func.FunctionApp()
+bronze_metadata_path = Config.BRONZE_METADATA_PATH
+
 
 @app.function_name(name="processbronze")
 @app.route(route="processbronze", methods=["GET", "POST"])
@@ -34,9 +36,8 @@ def processbronze(req: func.HttpRequest):
                                     start_date=start_date,
                                     account_url=Config.ACCOUNT_URL,
                                     bronze_data_path=Config.BRONZE_PATH,
-                                    bronze_metadata_path=
-                                    Config.BRONZE_METADATA_PATH
-        )
+                                    bronze_metadata_path=bronze_metadata_path
+                                    )
 
         total_rows = processor.run()
 
@@ -81,15 +82,15 @@ def processsilver(req: func.HttpRequest):
             return func.HttpResponse(
                 "Missing required parameter: symbol",
                 status_code=400
-            )
+                )
+
         processor = SilverProcessor(symbol=symbol,
-                                        mode=mode,
-                                        start_date=start_date,
-                                        account_url=Config.ACCOUNT_URL,
-                                        bronze_data_path=Config.BRONZE_PATH,
-                                        bronze_metadata_path=
-                                        Config.BRONZE_METADATA_PATH
-                        )
+                                    mode=mode,
+                                    start_date=start_date,
+                                    account_url=Config.ACCOUNT_URL,
+                                    bronze_data_path=Config.BRONZE_PATH,
+                                    bronze_metadata_path=bronze_metadata_path
+                                    )
 
         total_rows = processor.run()
 
@@ -102,7 +103,7 @@ def processsilver(req: func.HttpRequest):
             }),
             mimetype="application/json",
             status_code=200
-        )
+            )
 
     except Exception as e:
 
@@ -111,4 +112,4 @@ def processsilver(req: func.HttpRequest):
         return func.HttpResponse(
             f"Error: {str(e)}",
             status_code=500
-        )
+            )

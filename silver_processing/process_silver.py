@@ -36,7 +36,7 @@ class SilverProcessor:
         df = extractor.extract(fs,
                                symbol=self.symbol,
                                bronze_data_path=self.bronze_data_path
-            )
+                               )
 
         if df.empty:
             logging.info(f"No new data for {self.symbol}")
