@@ -63,8 +63,8 @@ class MetadataRepository:
         logging.info("Read processed files in progress")
 
     def get_processed_files(self, symbol: str, silver_metapath: str) -> list:
-        fs = self.create_filesystem()
-        files = f"{self.metadata_path}/{symbol}/**/*.parquet"
+
+        logging.info("Get processed files in progress")
+        # fs = self.create_filesystem()
+        # files = f"{self.metadata_path}/{symbol}/**/*.parquet"
         # bronze_parquet_files = fs.glob(files)
-        
-        
