@@ -2,6 +2,7 @@ from bronze_processing.transform_bronze import BronzeTransformer
 from bronze_processing.extract_bronze import BronzeExtractor
 import pandas as pd
 from datetime import datetime, UTC
+from pandas.testing import assert_frame_equal
 
 def test_bronze_transform():
     symbol = 'AAPL'
@@ -22,4 +23,4 @@ def test_bronze_transform():
 
     target = transformer.transform(df=raw, symbol=symbol)
 
-    assert source == target
+    assert assert_frame_equal(source,target)
