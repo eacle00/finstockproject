@@ -10,7 +10,7 @@ app = func.FunctionApp()
 @app.function_name(name="processbronze")
 @app.route(route="processbronze", methods=["GET", "POST"])
 def processbronze(req: func.HttpRequest):
-    
+
     logging.info("Processing stock ingestion request: Bronze")
 
     try:
@@ -28,15 +28,16 @@ def processbronze(req: func.HttpRequest):
                 "Missing required parameter: symbol",
                 status_code=400
             )
-        
+
         processor = BronzeProcessor(symbol=symbol,
                                     mode=mode,
                                     start_date=start_date,
                                     account_url=Config.ACCOUNT_URL,
                                     bronze_data_path=Config.BRONZE_PATH,
-                                    bronze_metadata_path=Config.BRONZE_METADATA_PATH
-                    )
-        
+                                    bronze_metadata_path=
+                                    Config.BRONZE_METADATA_PATH
+        )
+
         total_rows = processor.run()
 
         return func.HttpResponse(
@@ -49,7 +50,7 @@ def processbronze(req: func.HttpRequest):
             mimetype="application/json",
             status_code=200
         )
-    
+
     except Exception as e:
 
         logging.error(str(e))
@@ -86,9 +87,10 @@ def processsilver(req: func.HttpRequest):
                                         start_date=start_date,
                                         account_url=Config.ACCOUNT_URL,
                                         bronze_data_path=Config.BRONZE_PATH,
-                                        bronze_metadata_path=Config.BRONZE_METADATA_PATH
+                                        bronze_metadata_path=
+                                        Config.BRONZE_METADATA_PATH
                         )
-            
+
         total_rows = processor.run()
 
         return func.HttpResponse(
@@ -101,7 +103,7 @@ def processsilver(req: func.HttpRequest):
             mimetype="application/json",
             status_code=200
         )
-    
+
     except Exception as e:
 
         logging.error(str(e))

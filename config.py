@@ -1,5 +1,6 @@
 import os
 
+
 class Config:
     BRONZE_PATH = os.getenv("BRONZE_PATH")
     BRONZE_METADATA_PATH = os.getenv("BRONZE_METADATA_PATH")

@@ -4,20 +4,21 @@ import pyarrow as pa
 import pyarrow.dataset as ds
 import uuid
 
+
 class BronzeLoader:
-    
+
     def __init__(self, fs, bronze_path):
         self.fs = fs
         self.bronze_path = bronze_path
 
     def load(self, df: pd.DataFrame) -> str:
-        
+
         table = pa.Table.from_pandas(df)
 
         # add partition columns
         table = table.append_column("year", pa.array(df["date"].dt.year))
 
-        table = table.append_column("month",pa.array(df["date"].dt.month))
+        table = table.append_column("month", pa.array(df["date"].dt.month))
 
         file_id = uuid.uuid4().hex
 

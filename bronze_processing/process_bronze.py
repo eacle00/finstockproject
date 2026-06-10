@@ -6,7 +6,14 @@ from bronze_processing.load_bronze import BronzeLoader
 
 class BronzeProcessor:
 
-    def __init__(self, symbol, mode, start_date, account_url, bronze_data_path, bronze_metadata_path):
+    def __init__(self,
+                 symbol,
+                 mode,
+                 start_date,
+                 account_url,
+                 bronze_data_path,
+                 bronze_metadata_path):
+        
         self.symbol = symbol
         self.mode = mode
         self.start_date = start_date
@@ -15,7 +22,7 @@ class BronzeProcessor:
         self.bronze_metadata_path = bronze_metadata_path
     
     def process(self):
-        
+
         logging.info(f"Bronze: Processing {self.symbol} in {self.mode} mode")
 
         metadata = MetadataRepository(
@@ -80,12 +87,12 @@ class BronzeProcessor:
             rows = self.process()
 
             total_rows += rows
-        
+
         except Exception as symbol_error:
 
             logging.error(
                 f"{self.symbol} failed: "
                 f"{str(symbol_error)}"
             )
-        
+
         return total_rows

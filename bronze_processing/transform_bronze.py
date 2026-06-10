@@ -1,8 +1,9 @@
 import pandas as pd
 from datetime import datetime, UTC
 
+
 class BronzeTransformer:
-    
+
     def transform(self, df: pd.DataFrame, symbol: str) -> pd.DataFrame:
 
         if df.empty:
