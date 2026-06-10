@@ -29,7 +29,7 @@ def processbronze(req: func.HttpRequest):
                 status_code=400
             )
         
-        processor = SilverProcessor(symbol=symbol,
+        processor = BronzeProcessor(symbol=symbol,
                                     mode=mode,
                                     start_date=start_date,
                                     account_url=Config.ACCOUNT_URL,
