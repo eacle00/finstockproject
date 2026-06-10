@@ -1,6 +1,7 @@
 import json
 import fsspec
 from datetime import datetime, timedelta, UTC
+import logging
 
 class MetadataRepository:
     
@@ -52,3 +53,14 @@ class MetadataRepository:
                 f,
                 indent=4
             )
+    
+    def read_processed_files(self, silver_metapath: str) -> list:
+        
+        logging.info("Read processed files in progress")
+
+    def get_processed_files(self, symbol: str, silver_metapath: str) -> list:
+        fs = self.create_filesystem()
+
+        bronze_parquet_files = fs.glob(f"{self.metadata_path}/{symbol}/**/*.parquet")
+
+        

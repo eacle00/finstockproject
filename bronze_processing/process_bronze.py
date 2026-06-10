@@ -16,10 +16,7 @@ class BronzeProcessor:
     
     def process(self):
         
-        logging.info(
-            f"Bronze: Processing {self.symbol} "
-            f"in {self.mode} mode"
-        )
+        logging.info(f"Bronze: Processing {self.symbol} in {self.mode} mode")
 
         metadata = MetadataRepository(
             metadata_path=self.bronze_metadata_path,
